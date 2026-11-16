@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viborita</title>
+<style>
+  body { font-family: Arial; text-align: center; background: #111; color: white; margin: 0; padding: 10px; }
+  h1 { margin: 5px; }
+  #puntos { font-size: 20px; margin: 10px; }
+  canvas { background: #222; border: 3px solid #4CAF50; max-width: 95vw; }
+  .btns { margin-top: 10px; }
+  button { font-size: 22px; padding: 12px 18px; margin: 5px; border: none; border-radius: 10px; background: #4CAF50; color: white; }
+  #reiniciar { background: #ff5722; }
+</style>
+</head>
+<body>
+  <h1>🐍 VIBORITA</h1>
+  <div id="puntos">Puntos: 0 | Récord: 0</div>
+  <canvas id="juego" width="300" height="300"></canvas>
+  <div class="btns">
+    <div><button onclick="cambiar(0,-1)">⬆️</button></div>
+    <div>
+      <button onclick="cambiar(-1,0)">⬅️</button>
+      <button onclick="cambiar(1,0)">➡️</button>
+    </div>
+    <div><button onclick="cambiar(0,1)">⬇️</button></div>
+    <br>
+    <button id="reiniciar" onclick="empezar()">🔄 JUGAR DE NUEVO</button>
+  </div>
+
+<script>
+let canvas = document.getElementById("juego");
+let ctx = canvas.getContext("2d");
+let vibora, comida, dx, dy, puntos, record = 0, juego;
+
+function empezar(){
+  vibora = [{x:150,y:150},{x:140,y:150},{x:130,y:150}];
+  dx = 10; dy = 0;
+  puntos = 0;
+  ponerComida();
+  document.getElementById("puntos").innerText = "Puntos: 0 | Récord: " + record;
+  clearInterval(juego);
+  juego = setInterval(mover, 120);
+}
+function ponerComida(){
+  comida = {
+    x: Math.floor(Math.random()*30)*10,
+    y: Math.floor(Math.random()*30)*10
+  };
+}
+function cambiar(nx, ny){
+  if(nx === -dx && ny === -dy) return;
+  dx = nx*10; dy = ny*10;
+}
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowUp") cambiar(0,-1);
+  if(e.key==="ArrowDown") cambiar(0,1);
+  if(e.key==="ArrowLeft") cambiar(-1,0);
+  if(e.key==="ArrowRight") cambiar(1,0);
+});
+function mover(){
+  let cabeza = {x: vibora[0].x + dx, y: vibora[0].y + dy};
+  if(cabeza.x<0||cabeza.x>=300||cabeza.y<0||cabeza.y>=300||vibora.some(p=>p.x===cabeza.x&&p.y===cabeza.y)){
+    clearInterval(juego);
+    if(puntos>record) record=puntos;
+    alert("¡Perdiste! Puntos: "+puntos);
+    document.getElementById("puntos").innerText = "Puntos: "+puntos+" | Récord: "+record;
+    return;
+  }
+  vibora.unshift(cabeza);
+  if(cabeza.x===comida.x && cabeza.y===comida.y){
+    puntos+=10;
+    document.getElementById("puntos").innerText = "Puntos: "+puntos+" | Récord: "+record;
+    ponerComida();
+  } else {
+    vibora.pop();
+  }
+  ctx.fillStyle="#222";
+  ctx.fillRect(0,0,300,300);
+  ctx.fillStyle="red";
+  ctx.fillRect(comida.x, comida.y, 10, 10);
+  ctx.fillStyle="#4CAF50";
+  vibora.forEach(p=>ctx.fillRect(p.x,p.y,10,10));
+}
+empezar();
+</script>
+</body>
+</html>
